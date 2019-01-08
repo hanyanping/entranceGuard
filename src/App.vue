@@ -13,5 +13,6 @@ export default {
 <style>
 #app{
     background: #f4f4f4;
+    font-family: "微软雅黑",PingFang SC, Microsoft YaHei UI, Microsoft YaHei, Arial, sans-serif;
 }
 </style>
