@@ -85,7 +85,7 @@
                          :bottom-all-loaded="allLoaded">
                 <div class="listBox" v-for="(item, index) in list" :key="index" @click='goDetail'>
                     <div class="flexBetween listTop">
-                        <span>申请时间 : {{item.applyTime}}</span>
+                        <span> {{item.applyTime}}</span>
                         <span v-if="item.status == '待审核'" class="applyStatus origin">待审核</span>
                         <span v-if="item.status == '待预约'" class="applyStatus green">待预约</span>
                         <span v-if="item.status == '预约成功'" class="applyStatus blue">预约成功</span>

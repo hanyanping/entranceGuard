@@ -21,6 +21,25 @@
                     display: inline-block;
                 }
             }
+            .listName{
+                position: relative;
+                width: 59%;
+                .ulList{
+                    position: absolute;
+                    right: 0;
+                    text-align: center;
+                    background: #fff;
+                    width: 100px;
+                    height: 160px;
+                    overflow-y: scroll;
+                    border: 1px solid #f4f4f4;
+                    border-top: 0;
+                    li:hover{
+                        background: #bbb;
+                    }
+                }
+
+            }
             .inputText{
                 color: #929292;
                 font-family: "微软雅黑",PingFang SC, Microsoft YaHei UI, Microsoft YaHei, Arial, sans-serif;
@@ -28,7 +47,6 @@
                 width: 59%;
                 /*border-radius: 5px;*/
                 text-indent: 4px;
-                padding: 0 6px;
                 text-align: right;
             }
             .addInfo{
@@ -90,9 +108,9 @@
                 <span class="lableTextIcon">*</span>
                 <span class="lableText">受访单位 :</span>
             </div>
-            <select class="selectBox">
+            <select class="selectBox" v-model="userinfo.company">
                 <option value="">请选择受访单位</option>
-                <option>r444</option>
+                <option v-for="(item,index) in companyList" :key='index' :value="item.code">{{item.name}}</option>
             </select>
         </div>
         <div class="infoBox flexBetween">
@@ -100,8 +118,9 @@
                 <span class="lableTextIcon">*</span>
                 <span class="lableText">受访单位部门 :</span>
             </div>
-            <select class="selectBox">
+            <select class="selectBox" v-model="userinfo.department">
                 <option value="">请选择受访部门</option>
+                <option v-for="(item,index) in deptList" :key='index' :value="item.code">{{item.name}}</option>
             </select>
         </div>
         <div class="infoBox flexBetween">
@@ -109,14 +128,23 @@
                 <span class="lableTextIcon">*</span>
                 <span class="lableText">受访人 :</span>
             </div>
-            <input class='inputText' type="text" v-model="userinfo.respondent" placeholder="请输入受访人姓名(全名)"/>
+            <div class="listName">
+                <input class='inputText'style="width: 100%;" type="text" v-model="userinfo.respondent" placeholder="请输入受访人姓名(全名)"/>
+                <div class="ulList" style="display: none;" v-if="acceptNameList.length != 0">
+                    <ul>
+                        <li v-for="item in acceptNameList" @click="getName(item.name)">{{item.name}}</li>
+                    </ul>
+                </div>
+
+            </div>
+
         </div>
         <div class="infoBox flexBetween">
             <div class="inputLeft">
                 <span class="lableTextIcon">*</span>
-                <span class="lableText">受访人手机号 :</span>
+                <span class="lableText">申请人单位 :</span>
             </div>
-            <input class='inputText' type="text" v-model="userinfo.phone" placeholder="请输入受访人手机号"/>
+            <input class='inputText' type="text" v-model="userinfo.applicantCompaney" placeholder="请输入申请人单位"/>
         </div>
         <div class="infoBox flexBetween">
             <div class="inputLeft">
@@ -130,7 +158,7 @@
                 <span class="lableTextIcon">*</span>
                 <span class="lableText">身份证号 :</span>
             </div>
-            <input class='inputText' type="text" v-model="userinfo.idCard" placeholder="请输入身份证号"/>
+            <input class='inputText' type="text" @blur='validateId' v-model="userinfo.idCard" placeholder="请输入身份证号"/>
         </div>
         <div class="infoBox flexBetween">
             <div class="inputLeft">
@@ -219,12 +247,13 @@
                 year-format="{value} 年" month-format="{value} 月" date-format="{value} 日"
                 @confirm="handleConfirmend">
         </mt-datetime-picker>
-        <div class="submitInfo">提交并进行活体检测</div>
+        <div class="submitInfo" @click="submit">提交并进行活体检测</div>
     </div>
 </template>
 
 <script>
     import { DatetimePicker,Toast } from 'mint-ui';
+    import axios from 'axios'
     export default {
         name: "userinfo",
         data(){
@@ -233,22 +262,54 @@
                 isSelectOne: false,
                 beginTime: new Date(),
                 pickerVisible: '',
+                acceptNameList: [],
+                companyList:[],
+                deptList: [],
                 userinfo:{
                     company: '',
                     department: '',
                     respondent: '',
-                    phone: '',
+                    applicantCompaney: '',
                     applicant: '',
                     idCard: '',
                     reason: '',
                     startTime: '',
                     endTime: '',
                     isCar: '1',
-                    companions: []
-                }
+                    companions: [],
+                },
+                phone: ''
             }
         },
+        created(){
+            this.getCompany()
+        },
         watch:{
+            'userinfo.reason': function(){
+                if(this.userinfo.reason.length>30){
+                    this.userinfo.reason = this.userinfo.reason.substring(0,30)
+                }
+            },
+            'userinfo.company': function(){
+                if(this.userinfo.company){
+                    for(var item of this.companyList){
+                        if(item.code === this.userinfo.company){
+                            this.deptList = item.deptList;
+                        }
+                    }
+                }else{
+                    this.deptList = [];
+                    this.userinfo.department = '';
+                }
+            },
+            'userinfo.respondent': function(){//监听输入的受访人姓名
+                if(this.userinfo.respondent){
+                    if(this.userinfo.respondent.length>10){
+                        this.userinfo.respondent = this.userinfo.respondent.substring(0,10)
+                    }
+                    this.getNameList()
+                }
+            },
             'userinfo.startTime':function(){
                 var startStr = new Date(this.userinfo.startTime).getTime();
                 if(this.userinfo.endTime){
@@ -272,6 +333,158 @@
             }
         },
         methods:{
+            validateId(){
+                var reg = /(^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$)|(^[1-9]\d{5}\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{2}$)/;
+                if(!(reg.test(this.userinfo.idCard))){
+                    Toast('请输入正确身份证号')
+                }
+            },
+            submit(){
+                // userinfo:{
+                //     company: '',
+                //         department: '',
+                //         respondent: '',
+                //         applicantCompaney: '',
+                //         applicant: '',
+                //         idCard: '',
+                //         reason: '',
+                //         startTime: '',
+                //         endTime: '',
+                //         isCar: '1',
+                //         companions: [],
+                // },
+                if(this.userinfo.department == ''){
+                    Toast("请选择受访单位");
+                    return
+                }
+                if(this.userinfo.department == ''){
+                    Toast("请选择受访部门");
+                    return
+                }
+                if(this.userinfo.respondent == ''){
+                    Toast("请输入受访人");
+                    return
+                }
+                if(this.userinfo.applicantCompaney == ''){
+                    Toast("请输入申请单位");
+                    return
+                }
+                if(this.userinfo.applicant == ''){
+                    Toast("请输入申请人姓名");
+                    return
+                }
+                if(this.userinfo.idCard == ''){
+                    Toast("请输入身份证号");
+                    return
+                }
+                var reg = /(^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$)|(^[1-9]\d{5}\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{2}$)/;
+                if(!(reg.test(this.userinfo.idCard))){
+                    Toast('请输入正确身份证号')
+                    return
+                }
+                if(this.userinfo.reason == ''){
+                    Toast("请输入到访事由");
+                    return
+                }
+                if(this.userinfo.startTime == ''){
+                    Toast("请输入到访时间");
+                    return
+                }
+                if(this.userinfo.endTime == ''){
+                    Toast("请输入结束时间");
+                    return
+                }
+                if(this.userinfo.isCar == '1'){
+                    // if(){
+                        Toast("请输入车牌号");
+                        return
+                    // }
+
+                }
+            },
+            getNameList(){
+                this.acceptNameList = [{
+                    "name": "张三"
+                },{
+                    "name": "玩笑的发"
+                },{
+                        "name": "李四"
+                    }];
+                $(".ulList").css({"display":'block'})
+                return;
+                axios.post(this.ajaxUrl + "/accessforh5/checkInfo", {
+                    acceptName: this.userinfo.respondent
+                })
+                    .then(response => {
+                        console.log(response);
+                        const {data} = response;
+                        const {result} = data;
+                        const {rescode, resdes} = result;
+                        if (rescode != 200) {
+                            Toast(resdes);
+                        } else {
+
+                        }
+                    })
+                    .catch(err => {
+                        Toast(err);
+                    });
+            },
+            getCompany(){
+                var obj = {
+                    "rescode": "200",
+                    "resdes": "成功",
+                    "companyList": [{
+                        "code": "001",
+                        "name": "北京首都国际机场公安局",
+                        "deptList": [{
+                            "code": "001001",
+                            "name": "指挥中心"
+                        }, {
+                            "code": "001002",
+                            "name": "空防处"
+                        }, {
+                            "code": "001003",
+                            "name": "消防处"
+                        }]
+                    }, {
+                        "code": "002",
+                        "name": "北京中车宝联",
+                        "deptList": [{
+                            "code": "002001",
+                            "name": "产品部"
+                        }, {
+                            "code": "002002",
+                            "name": "商务部"
+                        }]
+                    }]
+                }
+                console.log(obj)
+                this.companyList = obj.companyList;
+                return;
+                axios.post(this.ajaxUrl + "/accessforh5/checkInfo", {
+                    phoneNum: this.phone
+                    })
+                    .then(response => {
+                        console.log(response);
+                        const {data} = response;
+                        const {result} = data;
+                        const {rescode, resdes} = result;
+                        if (rescode != 200) {
+                            Toast(resdes);
+                        } else {
+
+                        }
+                    })
+                    .catch(err => {
+                        Toast(err);
+                    });
+            },
+            getName(name){
+                $(".ulList").css({"display":'none'})
+                this.userinfo.respondent = name;
+                this.acceptNameList = [];
+            },
             select() {
                 if (!this.isSelect) {
                     this.isSelect = !this.isSelect;

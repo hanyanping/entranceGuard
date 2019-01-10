@@ -89,9 +89,9 @@
         <!-- tab-container -->
         <mt-tab-container v-model="selected">
             <mt-tab-container-item id="1">
-                <div class="scroll" v-if="noData">
-                    <mt-loadmore :bottom-method="loadBottom" bottomPullText="上拉加载更多" :auto-fill="false" ref="loadmore"
-                                 :bottom-all-loaded="allLoaded">
+                <div class="scroll" v-if="noWaitData">
+                    <mt-loadmore :bottom-method="loadBottomwait" bottomPullText="上拉加载更多" :auto-fill="false" ref="loadmorewait"
+                                 :bottom-all-loaded="allLoadedwait">
                         <div class="listBox" v-for="(item, index) in list" :key="index" @click='goDetail'>
                             <div class="flexBetween listTop">
                                 <span>申请时间 : {{item.applyTime}}</span>
@@ -151,9 +151,9 @@
                 </div>
             </mt-tab-container-item>
             <mt-tab-container-item id="2">
-                <div class="scroll" v-if="noData">
-                    <mt-loadmore :bottom-method="loadBottom" bottomPullText="上拉加载更多" :auto-fill="false" ref="loadmore"
-                                 :bottom-all-loaded="allLoaded">
+                <div class="scroll" v-if="nopassData">
+                    <mt-loadmore :bottom-method="loadBottompass" bottomPullText="上拉加载更多" :auto-fill="false" ref="loadmorepass"
+                                 :bottom-all-loaded="allLoadedpass">
                         <div class="listBox" v-for="(item, index) in list" :key="index" @click='goDetail'>
                             <div class="flexBetween listTop">
                                 <span>申请时间 : {{item.applyTime}}</span>
@@ -213,9 +213,9 @@
                 </div>
             </mt-tab-container-item>
             <mt-tab-container-item id="3">
-                <div class="scroll" v-if="noData">
-                    <mt-loadmore :bottom-method="loadBottom" bottomPullText="上拉加载更多" :auto-fill="false" ref="loadmore"
-                                 :bottom-all-loaded="allLoaded">
+                <div class="scroll" v-if="noNopassData">
+                    <mt-loadmore :bottom-method="loadBottomNopass" bottomPullText="上拉加载更多" :auto-fill="false" ref="loadmoreNopass"
+                                 :bottom-all-loaded="allLoadedNopass">
                         <div class="listBox" v-for="(item, index) in list" :key="index" @click='goDetail'>
                             <div class="flexBetween listTop">
                                 <span>申请时间 : {{item.applyTime}}</span>
@@ -288,13 +288,21 @@
         name: "applaypoliceList",
         data() {
             return {
-                allLoaded: false,
+                allLoadedwait: false,
+                allLoadedpass: false,
+                allLoadedNopass: false,
                 list: [{'status':'待预约','name':'ddd','code':'444444444','applyNo':'eeeeeee','type':'3','applyTime':'3333333'}],
                 pageSize: 10,
                 pageNum: 1,
                 userId: '',
                 loadMore: true,
+                loadMoreNopass: true,
+                loadMorepass: true,
+                loadMorewait: true,
                 noData: true,
+                noWaitData: true,
+                noNopassData: true,
+                nopassData: true,
                 selected: "1"
             }
         },
@@ -331,7 +339,7 @@
                 var data = {
                     pageSize: this.pageSize,
                     pageNum: this.pageNum,
-                    userId: this.userId,
+                    userId: 1,
                     type: 1
                 }
                 axios.post(this.ajaxUrl + "vehicle/userList", data)
@@ -363,16 +371,38 @@
                         console.log(error)
                     })
             },
-            loadBottom() {
+            loadBottomwait() {
                 this.pageNum++;
-                if (this.loadMore) {
+                if (this.loadMorewait) {
                     this.getDataList()
                 } else {
                     Toast('没有更多数据')
 
                 }
                 //  this.allLoaded = true;// 若数据已全部获取完毕
-                this.$refs.loadmore.onBottomLoaded();
+                this.$refs.loadmorewait.onBottomLoaded();
+            },
+            loadBottompass() {
+                this.pageNum++;
+                if (this.loadMorepass) {
+                    this.getDataList()
+                } else {
+                    Toast('没有更多数据')
+
+                }
+                //  this.allLoaded = true;// 若数据已全部获取完毕
+                this.$refs.loadmorepass.onBottomLoaded();
+            },
+            loadBottomNopass() {
+                this.pageNum++;
+                if (this.loadMoreNopass) {
+                    this.getDataList()
+                } else {
+                    Toast('没有更多数据')
+
+                }
+                //  this.allLoaded = true;// 若数据已全部获取完毕
+                this.$refs.loadmoreNopass.onBottomLoaded();
             }
         }
     }
