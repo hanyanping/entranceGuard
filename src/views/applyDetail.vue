@@ -12,7 +12,7 @@
             color: #232323;
             .infoBox{
                 .shoufangInfo{
-                    padding: 5px 0;
+                    padding: 8px 0;
                 }
                 .peitong{
                     display: flex;
@@ -33,7 +33,7 @@
                 }
             }
             .imgInfo{
-                background: url('../assets/images/geren.png') no-repeat center center;
+                background: url('../assets/images/icon.jpg') no-repeat center center;
                 background-size: cover;
                 height: 120px;
                 width: 90px;

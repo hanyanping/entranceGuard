@@ -42,8 +42,20 @@
                     {'name':'历史申请记录',icon:require('../assets/images/liebiao.png'),router: '/applayList'}]
             }
         },
+        watch(){
+
+        },
+        mounted(){
+            window.onload = function() {
+                document.addEventListener('message', function(msg) {
+                    alert(msg.phoneNum)
+                    // message = msg.data;
+                });
+            }
+        },
         methods:{
             goRouter(router){
+                // window.location.href= '/entranceGuard/'+router
                 this.$router.push({path:router})
             }
         }

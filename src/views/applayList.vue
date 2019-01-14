@@ -86,14 +86,9 @@
                 <div class="listBox" v-for="(item, index) in list" :key="index" @click='goDetail'>
                     <div class="flexBetween listTop">
                         <span> {{item.applyTime}}</span>
-                        <span v-if="item.status == '待审核'" class="applyStatus origin">待审核</span>
-                        <span v-if="item.status == '待预约'" class="applyStatus green">待预约</span>
-                        <span v-if="item.status == '预约成功'" class="applyStatus blue">预约成功</span>
-                        <span v-if="item.status == '审核不通过'" class="applyStatus nopass">审核不通过</span>
-                        <span v-if="item.status == '审核失败'" class="applyStatus nopass">审核失败</span>
-                        <span v-if="item.status == '已签发'" class="already">已签发</span>
-                        <span v-if="item.status == '身份待验证'" class="origin">身份待验证</span>
-                        <span v-if="item.status == '身份验证失败'" class="applyStatus nopass">身份验证失败</span>
+                        <span v-if="item.auditStatus == '1'" class="applyStatus origin">待审核</span>
+                        <span v-if="item.auditStatus == '2'" class="applyStatus nopass">审核不通过</span>
+                        <span v-if="item.auditStatus == '3'" class="already">审核通过</span>
                     </div>
                     <div class="listMiddle flexBetween"
                          @click='goDetail(item.applyNo,item.type,item.status)'>
@@ -101,37 +96,16 @@
                             <!--<img class='applayIcon godetail' src="../assets/images/geren.png">-->
                             <div class='info'>
                                 <div class="flexBetween infoText">
-                                    <p>姓名：个人 </p>
-                                    <span >性别： 男</span>
+                                    <p>姓名：{{item.name}} </p>
+                                    <span >性别： {{item.sex}}</span>
                                 </div>
-                                <p class="idCard infoText" >身份证号：411424233432345676</p>
-                                <p class="companyName infoText">单位名称：北京中车科技有限责任公司
-                                    <span>{{item.code}}</span>
+                                <p class="idCard infoText" >身份证号：{{item.cardNum}}</p>
+                                <p class="companyName infoText">单位名称：{{item.companyName}}
                                 </p>
                             </div>
                         </div>
                         <div class="flexRight">
                             <img class='godetail' src="../assets/images/right.png">
-                        </div>
-                    </div>
-                    <div class="listMiddle flexBetween" v-if="item.type == 2"
-                         @click='goDetail(item.applyNo,item.type,item.status)'>
-                        <div class="flexLeft">
-                            <!--<img class='applayIcon' src="../assets/images/danwei.png">-->
-                            <div class='info'>
-                                <p>所有权：单位</p>
-                                <p>所有人：{{item.name}}</p>
-                                <p>证件号码：{{item.code}}</p>
-                            </div>
-                        </div>
-                        <div class="flexRight">
-                            <span class="goSub" @click.stop='goSubscible(item.applyNo)'
-                                  v-if="item.status == '待预约'">立即预约</span>
-                            <span class="goSub" @click.stop='goApply(item.applyNo,item.type)'
-                                  v-if="item.status == '审核不通过' || item.status == '审核失败' ">重新申请</span>
-                            <!--<img @click.stop='goSubcode(item.appointmentTime,item.applyNo)' v-if="item.status =='预约成功'"-->
-                                 <!--style='height:30px;width:30px;' src='../assets/images/look.png'>-->
-                            <!--<img class='godetail' src="../assets/images/right.png">-->
                         </div>
                     </div>
                 </div>
@@ -153,7 +127,7 @@
         data() {
             return {
                 allLoaded: false,
-                list: [{'status':'待预约','name':'ddd','code':'444444444','applyNo':'eeeeeee','type':'3','applyTime':'3333333'}],
+                list: [{'auditStatus':'1','name':'哈哈哈',sex:'nan','code':'444444444','applyNo':'eeeeeee','companyName':'北京中车科技有限责任公司','applyTime':'2018-12-24'}],
                 pageSize: 10,
                 pageNum: 1,
                 userId: '',
@@ -191,16 +165,17 @@
                 })
             },
             getDataList() {
+                return;
                 var data = {
                     pageSize: this.pageSize,
                     pageNum: this.pageNum,
                     userId: this.userId,
                     type: 1
                 }
-                axios.post(this.ajaxUrl + "vehicle/userList", data)
+                axios.post(this.ajaxUrl + "/accessforh5/getApplyList", data)
                     .then(response => {
                         console.log(response);
-                        var listdata = response.data.list;
+                        var listdata = response.data.applyList;
                         if (response.data.result.rescode == 200) {
                             if (response.data.list.length != 0) {
                                 this.noData = true;

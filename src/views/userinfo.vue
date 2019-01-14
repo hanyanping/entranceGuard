@@ -5,7 +5,6 @@
         padding: 8px;
         border-radius: 5px;
         .infoBox{
-             height: 40px;
             line-height: 40px;
             background: #fff;
             font-size: 14px;
@@ -19,6 +18,18 @@
                 }
                 .lableText{
                     display: inline-block;
+                }
+            }
+            .carBox{
+                width: 100%;
+                tr td{
+                    border: 1px solid #bbb;
+                    padding: 2px 10px;
+                    text-align: center;
+                }
+                tr td:nth-last-child(1){
+                    color: #f00;
+                    cursor: pointer;
                 }
             }
             .listName{
@@ -38,7 +49,6 @@
                         background: #bbb;
                     }
                 }
-
             }
             .inputText{
                 color: #929292;
@@ -209,10 +219,23 @@
                 </div>
             </div>
         </div>
+
         <div class="infoBox flexBetween" v-if="isSelect">
             <div class="inputLeft"></div>
             <div style="min-width: 70%;">
-                <input class='inputText' type="text" style="text-align: left;"   placeholder="请输入车牌号">
+                <input class='inputText' type="text" style="text-align: left;"  v-model="carNUm" placeholder="请输入车牌号">
+                <span class="addInfo" @click="addlicense">添加</span>
+            </div>
+        </div>
+        <div class="infoBox flexBetween" v-if="isSelect && carData.length !=0">
+            <div class="inputLeft"></div>
+            <div style="min-width: 70%;">
+                <table class="carBox">
+                    <tr v-for="(item,index) in carData">
+                        <td>{{item}}</td>
+                        <td @click="deleteItem(item,index)">删除</td>
+                    </tr>
+                </table>
             </div>
         </div>
         <div class="infoBox flexBetween">
@@ -220,15 +243,27 @@
             <div class="inputLeft">
                陪同人信息 :</div>
             <div style="min-width: 70%;">
-                <input class='inputText' style="text-align: left;" type="text" placeholder="请输入陪同人姓名">
+                <input class='inputText' style="text-align: left;" v-model="companyName" type="text" placeholder="请输入陪同人姓名">
                 <!--<span class="addInfo"></span>-->
             </div>
         </div>
         <div class="infoBox flexBetween">
             <div class="inputLeft"></div>
             <div style="min-width: 70%;">
-                <input class='inputText' type="text" placeholder="请输入陪同人身份证号">
-                <span class="addInfo">添加</span>
+                <input class='inputText' type="text" v-model="companyCard" placeholder="请输入陪同人身份证号">
+                <span class="addInfo" @click="addName">添加</span>
+            </div>
+        </div>
+        <div class="infoBox flexBetween" v-if=" userinfo.entourageList.length !=0">
+            <div class="inputLeft"></div>
+            <div style="min-width: 90%;">
+                <table class="carBox">
+                    <tr v-for="(item,index) in userinfo.entourageList">
+                        <td>{{item.name}}</td>
+                        <td>{{item.cardNum}}</td>
+                        <td @click="deletePerson(item,index)">删除</td>
+                    </tr>
+                </table>
             </div>
         </div>
         <mt-datetime-picker
@@ -253,11 +288,16 @@
 
 <script>
     import { DatetimePicker,Toast } from 'mint-ui';
+    import Patterns from '../common/patternRules'
     import axios from 'axios'
     export default {
         name: "userinfo",
         data(){
             return{
+                companyCard: '',
+                companyName: '',
+                carNUm: '',
+                carData: ["京1234"],
                 isSelect: true,
                 isSelectOne: false,
                 beginTime: new Date(),
@@ -276,7 +316,8 @@
                     startTime: '',
                     endTime: '',
                     isCar: '1',
-                    companions: [],
+                    licenseNum: '',
+                    entourageList:[{name:'哈哈哈哈',cardNum:'411424199001125469'}]
                 },
                 phone: ''
             }
@@ -303,6 +344,16 @@
                 }
             },
             'userinfo.respondent': function(){//监听输入的受访人姓名
+                if(this.userinfo.company == ''){
+                    this.userinfo.respondent = '';
+                    Toast("请选择受访单位");
+                    return;
+                }
+                if(this.userinfo.department == ''){
+                    this.userinfo.respondent = '';
+                    Toast("请选择受访单位");
+                    return;
+                }
                 if(this.userinfo.respondent){
                     if(this.userinfo.respondent.length>10){
                         this.userinfo.respondent = this.userinfo.respondent.substring(0,10)
@@ -333,26 +384,57 @@
             }
         },
         methods:{
+            deletePerson(item,index){
+                this.userinfo.entourageList.splice(index,1);
+            },
+            deleteItem(item,index){
+                this.carData.splice(index,1)
+            },
+            addlicense(){
+                if(this.userinfo.carData.length ==5){
+                    Toast(" 车辆最多可添加5辆");
+                    return;
+                }
+                this.carData.push(this.carNUm);
+                this.carNUm = '';
+            },
+            addName(){
+                if(this.userinfo.entourageList.length ==5){
+                    Toast("陪同人最多可添加5人");
+                    return;
+                }
+                if(this.companyName == ''){
+                    Toast("请输入陪同人姓名");
+                    return;
+                }
+                if(this.companyName.length > 10){
+                    this.companyName = this.companyName.substring(0,10);
+
+                }
+                if(this.companyCard){
+                    if(!(Patterns.idNum.test(this.companyCard))){
+                        Toast('请输入正确的身份证号');
+                        return;
+                    }
+                }
+                if(this.companyCard == ''){
+                    Toast('请输入陪同人身份证号');
+                     return;
+                }
+                var obj = {
+                    name: this.companyName,
+                    cardNum:this.companyCard
+                }
+                this.userinfo.entourageList.push(obj)
+                this.companyName = '';
+                this.companyCard = ''
+            },
             validateId(){
-                var reg = /(^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$)|(^[1-9]\d{5}\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{2}$)/;
-                if(!(reg.test(this.userinfo.idCard))){
+                if(!(Patterns.idNum.test(this.userinfo.idCard))){
                     Toast('请输入正确身份证号')
                 }
             },
             submit(){
-                // userinfo:{
-                //     company: '',
-                //         department: '',
-                //         respondent: '',
-                //         applicantCompaney: '',
-                //         applicant: '',
-                //         idCard: '',
-                //         reason: '',
-                //         startTime: '',
-                //         endTime: '',
-                //         isCar: '1',
-                //         companions: [],
-                // },
                 if(this.userinfo.department == ''){
                     Toast("请选择受访单位");
                     return
@@ -377,8 +459,7 @@
                     Toast("请输入身份证号");
                     return
                 }
-                var reg = /(^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$)|(^[1-9]\d{5}\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{2}$)/;
-                if(!(reg.test(this.userinfo.idCard))){
+                if(!(Patterns.idNum.test(this.userinfo.idCard))){
                     Toast('请输入正确身份证号')
                     return
                 }
@@ -395,11 +476,33 @@
                     return
                 }
                 if(this.userinfo.isCar == '1'){
-                    // if(){
+                    if(this.carData.length == 0){
                         Toast("请输入车牌号");
                         return
-                    // }
-
+                    }
+                }
+                if(this.isSelect){
+                    this.userinfo.isCar = '1';
+                }
+                if(this.isSelectOne){
+                    this.userinfo.isCar = '2';
+                }
+                this.userinfo.licenseNum = this.carData.join(",");
+                var submitData = {
+                    phoneNum: this.phone,
+                    companyCode: this.userinfo.company,
+                    deptCode: this.userinfo.department,
+                    acceptName:this.userinfo.respondent,
+                    name: this.userinfo.applicant,
+                    cardNum: this.userinfo.idCard,
+                    companyName: this.userinfo.applicantCompaney,
+                    reason: this.userinfo.reason,
+                    startTime: this.userinfo.startTime,
+                    endTime: this.userinfo.endTime,
+                    carFlag: this.userinfo.isCar,
+                    licenseNum: this.userinfo.licenseNum,
+                    photoData: this.userinfo.photoData,//待确认
+                    entourageList: this.userinfo.entourageList
                 }
             },
             getNameList(){
@@ -413,6 +516,8 @@
                 $(".ulList").css({"display":'block'})
                 return;
                 axios.post(this.ajaxUrl + "/accessforh5/checkInfo", {
+                    companyCode: this.userinfo.company,
+                    deptCode: this.userinfo.department,
                     acceptName: this.userinfo.respondent
                 })
                     .then(response => {
