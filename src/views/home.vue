@@ -25,10 +25,10 @@
 </style>
 <template>
     <div class="homepage">
-        <div v-for="item in listdata" class="homeList flexBetween" @click="goRouter(item.router)">
+          <router-link :to='item.router'v-for="item in listdata" class="homeList flexBetween">
             <span>{{item.name}}</span>
             <img :src="item.icon">
-        </div>
+          </router-link>
     </div>
 </template>
 
@@ -55,8 +55,9 @@
         },
         methods:{
             goRouter(router){
-                // window.location.href= '/entranceGuard/'+router
-                this.$router.push({path:router})
+              console.log(document.location.host)
+                 window.location.href= document.location.host+'/entranceGuard'+router
+//                this.$router.push({path:router})
             }
         }
     }
