@@ -25,7 +25,7 @@
 </style>
 <template>
     <div class="homepage">
-          <router-link :to='item.router'v-for="(item,index) in listdata" :key='index' class="homeList flexBetween">
+          <router-link :to='item.router' v-for="(item,index) in listdata" :key='index' class="homeList flexBetween">
             <span>{{item.name}}</span>
             <img :src="item.icon">
           </router-link>
@@ -39,20 +39,32 @@
             return{
                 listdata:[
                     {'name':'预约申请',icon:require('../assets/images/shenqing.png'),router: '/userinfo'},
-                    {'name':'历史申请记录',icon:require('../assets/images/liebiao.png'),router: '/applayList'}]
+                    {'name':'历史申请记录',icon:require('../assets/images/liebiao.png'),router: '/applayList'}],
+                phone: ''
             }
         },
-        watch(){
-
-        },
-        mounted(){
+        created(){
             window.onload = function() {
                 document.addEventListener('message', function(msg) {
-                    var msg = JSON.stringify(msg)
-                    alert(msg)
-                    alert(msg.phoneNum)
+                    alert(msg.data)
+                    var data = JSON.parse(msg.data)
+                    if(data.hasOwnProperty('phoneNum')){
+                        localStorage.setItem('phone',data.phoneNum)
+                    }
+
                 });
             }
+        },
+        mounted(){
+            if(localStorage.getItem('phone')){
+                this.phone = localStorage.getItem('phone');
+            }
+            var data = {phoneNum: '1764444'};
+            console.log()
+            if(data.hasOwnProperty('aa')){
+                console.log(data)
+            }
+            console.log(data[phoneNum])
         },
         methods:{
             goRouter(router){

@@ -317,13 +317,42 @@
                     endTime: '',
                     isCar: '1',
                     licenseNum: '',
+                    chapterUrl: '',
                     entourageList:[{name:'哈哈哈哈',cardNum:'411424199001125469'}]
                 },
                 phone: ''
             }
         },
         created(){
-            this.getCompany()
+            this.getCompany();
+            if(localStorage.getItem('phone')){
+                this.phone = localStorage.getItem('phone');
+            }
+        },
+        destroyed() {
+            var that = this;
+            document.removeEventListener('message', function(msg) {//获取客户端人脸识别数据
+                if(msg.data){
+                    that.userinfo.chapterUrl = msg.data;
+                    localStorage.setItem("url",that.userinfo.chapterUrl)
+                }else{
+                    Toast("检测失败，请重新检测")
+                }
+            },true)
+        },
+        mounted(){
+            var that = this;
+            document.addEventListener('message', function(msg) {//获取客户端人脸识别数据
+                var data = JSON.parse(msg.data)
+                if(data){
+                    if(data.hasOwnProperty('imageData')){
+                        that.userinfo.chapterUrl = msg.data;
+                        localStorage.setItem("url",that.userinfo.chapterUrl)
+                    }
+                }else{
+                    Toast("检测失败，请重新检测")
+                }
+            });
         },
         watch:{
             'userinfo.reason': function(){
@@ -384,6 +413,9 @@
             }
         },
         methods:{
+            getPersonInfo(){
+
+            },
             deletePerson(item,index){
                 this.userinfo.entourageList.splice(index,1);
             },
@@ -435,6 +467,8 @@
                 }
             },
             submit(){
+                window.postMessage('success');
+                return;
                 if(this.userinfo.department == ''){
                     Toast("请选择受访单位");
                     return
