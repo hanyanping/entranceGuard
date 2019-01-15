@@ -159,7 +159,7 @@
                 this.$router.push({path: '/subscribe', query: {applyNo: applyNo}})
             },
             goDetail(applyNo, applyType, applyStatus) {
-                window.location.href = '/applyDetail';
+                window.location.href = this.ceshiUrl+'/applyDetail';
                 // this.$router.push({
                 //     path: '/applyDetail',
                 //     // query: {applyNo: applyNo, applyType: applyType, applyStatus: applyStatus}

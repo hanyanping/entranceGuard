@@ -14,6 +14,7 @@ Vue.use(MintUI);
 Vue.prototype.$axios = axios;
 Vue.prototype.ajaxUrl = '/non_vehicle/';
 Vue.prototype.ajaxUrlimg='/non_vehicle_img';
+Vue.prototype.ceshiUrl = 'http://10.2.9.15:8080/entranceGuard'
 Vue.config.productionTip = false;
 function setTitle(title) {
     document.title = title || document.title;

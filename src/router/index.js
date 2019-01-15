@@ -10,7 +10,7 @@ Vue.use(Router)
 
 export default new Router({
     base: '/entranceGuard/',
-    // mode: 'history',
+    mode: 'history',
     routes: [
         {
           path: '/',
