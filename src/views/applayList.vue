@@ -159,10 +159,11 @@
                 this.$router.push({path: '/subscribe', query: {applyNo: applyNo}})
             },
             goDetail(applyNo, applyType, applyStatus) {
-                this.$router.push({
-                    path: '/applyDetail',
-                    // query: {applyNo: applyNo, applyType: applyType, applyStatus: applyStatus}
-                })
+                window.location.href = '/applyDetail';
+                // this.$router.push({
+                //     path: '/applyDetail',
+                //     // query: {applyNo: applyNo, applyType: applyType, applyStatus: applyStatus}
+                // })
             },
             getDataList() {
                 return;
