@@ -113,6 +113,8 @@
 </style>
 <template>
     <div class="userInfo">
+        <div>{{userinfo.chapterUrl}}</div>
+        <img :src="userinfo.chapterUrl">
         <div class="infoBox flexBetween">
             <div class="inputLeft">
                 <span class="lableTextIcon">*</span>
@@ -341,12 +343,13 @@
             },true)
         },
         mounted(){
+            alert(window.location.href)
             var that = this;
             document.addEventListener('message', function(msg) {//获取客户端人脸识别数据
                 var data = JSON.parse(msg.data)
                 if(data){
                     if(data.hasOwnProperty('imageData')){
-                        that.userinfo.chapterUrl = msg.data;
+                        that.userinfo.chapterUrl = msg.data.imageData;
                         localStorage.setItem("url",that.userinfo.chapterUrl)
                     }
                 }else{

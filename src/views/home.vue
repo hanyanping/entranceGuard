@@ -25,7 +25,7 @@
 </style>
 <template>
     <div class="homepage">
-          <router-link :to='item.router' v-for="(item,index) in listdata" :key='index' class="homeList flexBetween">
+          <router-link  v-for="(item,index) in listdata" :key='index' class="homeList flexBetween"  :to="{path:item.router,query: {name: 1}}">
             <span>{{item.name}}</span>
             <img :src="item.icon">
           </router-link>
@@ -46,12 +46,10 @@
         created(){
             window.onload = function() {
                 document.addEventListener('message', function(msg) {
-                    alert(msg.data)
                     var data = JSON.parse(msg.data)
                     if(data.hasOwnProperty('phoneNum')){
                         localStorage.setItem('phone',data.phoneNum)
                     }
-
                 });
             }
         },
@@ -59,18 +57,20 @@
             if(localStorage.getItem('phone')){
                 this.phone = localStorage.getItem('phone');
             }
-            var data = {phoneNum: '1764444'};
-            console.log()
-            if(data.hasOwnProperty('aa')){
-                console.log(data)
-            }
-            console.log(data[phoneNum])
         },
         methods:{
+            go(){
+                window.location.href = 'https://www.baidu.com'
+                // window.open('https://www.baidu.com');
+            },
             goRouter(router){
-              console.log(document.location.host)
-                 window.location.href= document.location.host+'/entranceGuard'+router
-//                this.$router.push({path:router})
+                // window.location.href = 'https://www.baidu.com'
+                // alert(router)
+                    let routeData = this.$router.resolve({
+                        path: router });
+                    window.open(routeData.href, '_blank');
+              // console.log(document.location.host+'/entranceGuard'+router)
+              //   window.open(document.location.host+'/entranceGuard'+router)
             }
         }
     }
