@@ -12,7 +12,7 @@ import '../static/flexible.debug.js'
 import '../static/flexible_css.debug.js'
 Vue.use(MintUI);
 Vue.prototype.$axios = axios;
-Vue.prototype.ajaxUrl = '/non_vehicle/';
+Vue.prototype.ajaxUrl = '/accessforh5/';
 Vue.prototype.ajaxUrlimg='/non_vehicle_img';
 Vue.prototype.ceshiUrl = 'http://10.2.9.15:8080/entranceGuard'
 Vue.config.productionTip = false;

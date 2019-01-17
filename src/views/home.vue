@@ -25,10 +25,14 @@
 </style>
 <template>
     <div class="homepage">
-          <router-link  v-for="(item,index) in listdata" :key='index' class="homeList flexBetween"  :to="{path:item.router,query: {name: 1}}">
+          <!--<router-link  v-for="(item,index) in listdata" :key='index' class="homeList flexBetween"  :to="{path:item.router,query: {name: new Date().getTime()}}">-->
+            <!--<span>{{item.name}}</span>-->
+            <!--<img :src="item.icon">-->
+          <!--</router-link>-->
+        <div  v-for="(item,index) in listdata" :key='index' class="homeList flexBetween"  @click="goRouter(item.router)">
             <span>{{item.name}}</span>
             <img :src="item.icon">
-          </router-link>
+        </div>
     </div>
 </template>
 
@@ -67,7 +71,7 @@
                 // window.location.href = 'https://www.baidu.com'
                 // alert(router)
                     let routeData = this.$router.resolve({
-                        path: router });
+                        path: router,query: {name: new Date().getTime()} });
                     window.open(routeData.href, '_blank');
               // console.log(document.location.host+'/entranceGuard'+router)
               //   window.open(document.location.host+'/entranceGuard'+router)

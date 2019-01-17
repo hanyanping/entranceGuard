@@ -41,7 +41,8 @@
                     text-align: center;
                     background: #fff;
                     width: 100px;
-                    height: 160px;
+                    min-height: 30px;
+                    max-height: 160px;
                     overflow-y: scroll;
                     border: 1px solid #f4f4f4;
                     border-top: 0;
@@ -141,7 +142,7 @@
                 <span class="lableText">受访人 :</span>
             </div>
             <div class="listName">
-                <input class='inputText'style="width: 100%;" type="text" v-model="userinfo.respondent" placeholder="请输入受访人姓名(全名)"/>
+                <input class='inputText'style="width: 100%;" type="text" v-model="userinfo.respondent" placeholder="请输入受访人姓名(全名)" @blure="checkRespondent"/>
                 <div class="ulList" style="display: none;" v-if="acceptNameList.length != 0">
                     <ul>
                         <li v-for="item in acceptNameList" @click="getName(item.name)">{{item.name}}</li>
@@ -322,7 +323,7 @@
                     chapterUrl: '',
                     entourageList:[{name:'哈哈哈哈',cardNum:'411424199001125469'}]
                 },
-                phone: ''
+                phone: '17666143833'
             }
         },
         created(){
@@ -343,7 +344,6 @@
             },true)
         },
         mounted(){
-            alert(window.location.href)
             var that = this;
             document.addEventListener('message', function(msg) {//获取客户端人脸识别数据
                 var data = JSON.parse(msg.data)
@@ -376,16 +376,16 @@
                 }
             },
             'userinfo.respondent': function(){//监听输入的受访人姓名
-                if(this.userinfo.company == ''){
-                    this.userinfo.respondent = '';
-                    Toast("请选择受访单位");
-                    return;
-                }
-                if(this.userinfo.department == ''){
-                    this.userinfo.respondent = '';
-                    Toast("请选择受访单位");
-                    return;
-                }
+                // if(this.userinfo.company == ''){
+                //     this.userinfo.respondent = '';
+                //     Toast("请选择受访单位");
+                //     return;
+                // }
+                // if(this.userinfo.department == ''){
+                //     this.userinfo.respondent = '';
+                //     Toast("请选择受访单位");
+                //     return;
+                // }
                 if(this.userinfo.respondent){
                     if(this.userinfo.respondent.length>10){
                         this.userinfo.respondent = this.userinfo.respondent.substring(0,10)
@@ -416,6 +416,21 @@
             }
         },
         methods:{
+            checkRespondent(){
+                console.log(this.respondent)
+                console.log(this.acceptNameList)
+                if(this.acceptNameList.length == 0){
+                    this.respondent = '';
+                    Toast('请选择受访人姓名')
+                }else{
+                    var n = 0;
+                    for(let item of this.acceptNameList){
+                        if(item.name != 'this.respondent'){
+                            n++;
+                        }
+                    }
+                }
+            },
             getPersonInfo(){
 
             },
@@ -543,84 +558,37 @@
                 }
             },
             getNameList(){
-                this.acceptNameList = [{
-                    "name": "张三"
-                },{
-                    "name": "玩笑的发"
-                },{
-                        "name": "李四"
-                    }];
-                $(".ulList").css({"display":'block'})
-                return;
-                axios.post(this.ajaxUrl + "/accessforh5/checkInfo", {
-                    companyCode: this.userinfo.company,
-                    deptCode: this.userinfo.department,
+                axios.post(this.ajaxUrl + "getAcceptNameList", {
                     acceptName: this.userinfo.respondent
                 })
                     .then(response => {
-                        console.log(response);
-                        const {data} = response;
-                        const {result} = data;
-                        const {rescode, resdes} = result;
-                        if (rescode != 200) {
-                            Toast(resdes);
-                        } else {
-
+                        if(response.data.rescode == 200){
+                            this.acceptNameList = response.data.acceptNameList;
+                            $(".ulList").css({"display":'block'})
+                        }else{
+                            Toast(response.data.resdes)
                         }
+
                     })
                     .catch(err => {
-                        Toast(err);
-                    });
+                        console.log(err);
+                    })
             },
             getCompany(){
-                var obj = {
-                    "rescode": "200",
-                    "resdes": "成功",
-                    "companyList": [{
-                        "code": "001",
-                        "name": "北京首都国际机场公安局",
-                        "deptList": [{
-                            "code": "001001",
-                            "name": "指挥中心"
-                        }, {
-                            "code": "001002",
-                            "name": "空防处"
-                        }, {
-                            "code": "001003",
-                            "name": "消防处"
-                        }]
-                    }, {
-                        "code": "002",
-                        "name": "北京中车宝联",
-                        "deptList": [{
-                            "code": "002001",
-                            "name": "产品部"
-                        }, {
-                            "code": "002002",
-                            "name": "商务部"
-                        }]
-                    }]
-                }
-                console.log(obj)
-                this.companyList = obj.companyList;
-                return;
-                axios.post(this.ajaxUrl + "/accessforh5/checkInfo", {
+                axios.post(this.ajaxUrl + 'getCompanyDept', {
                     phoneNum: this.phone
-                    })
+                })
                     .then(response => {
-                        console.log(response);
-                        const {data} = response;
-                        const {result} = data;
-                        const {rescode, resdes} = result;
-                        if (rescode != 200) {
-                            Toast(resdes);
-                        } else {
-
+                        if(response.data.rescode == 200){
+                            this.companyList = response.data.companyList;
+                        }else{
+                            Toast(response.data.resdes)
                         }
+
                     })
                     .catch(err => {
-                        Toast(err);
-                    });
+                        console.log(err);
+                    })
             },
             getName(name){
                 $(".ulList").css({"display":'none'})
