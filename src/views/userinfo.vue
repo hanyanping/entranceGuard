@@ -142,7 +142,7 @@
                 <span class="lableText">受访人 :</span>
             </div>
             <div class="listName">
-                <input class='inputText'style="width: 100%;" type="text" v-model="userinfo.respondent" placeholder="请输入受访人姓名(全名)" @blure="checkRespondent"/>
+                <input class='inputText'style="width: 100%;" type="text" v-model="userinfo.respondent" placeholder="请输入受访人姓名(全名)" @blur="checkRespondent"/>
                 <div class="ulList" style="display: none;" v-if="acceptNameList.length != 0">
                     <ul>
                         <li v-for="item in acceptNameList" @click="getName(item.name)">{{item.name}}</li>
@@ -327,12 +327,16 @@
             }
         },
         created(){
+            if(localStorage.getItem('userinfo')){
+                this.userinfo = JSON.parse(localStorage.getItem('userinfo',this.userinfo));
+            }
             this.getCompany();
             if(localStorage.getItem('phone')){
                 this.phone = localStorage.getItem('phone');
             }
         },
         destroyed() {
+            localStorage.setItem('userinfo',JSON.stringify(this.userinfo));
             var that = this;
             document.removeEventListener('message', function(msg) {//获取客户端人脸识别数据
                 if(msg.data){
@@ -344,6 +348,7 @@
             },true)
         },
         mounted(){
+
             var that = this;
             document.addEventListener('message', function(msg) {//获取客户端人脸识别数据
                 var data = JSON.parse(msg.data)
@@ -417,23 +422,25 @@
         },
         methods:{
             checkRespondent(){
-                console.log(this.respondent)
+                console.log(this.userinfo.respondent)
                 console.log(this.acceptNameList)
                 if(this.acceptNameList.length == 0){
-                    this.respondent = '';
-                    Toast('请选择受访人姓名')
+                    this.userinfo.respondent = '';
+                    Toast('请输入并选择受访人姓名')
                 }else{
                     var n = 0;
                     for(let item of this.acceptNameList){
-                        if(item.name != 'this.respondent'){
+                        if(item.name != this.userinfo.respondent){
                             n++;
                         }
                     }
+                    if(n == this.acceptNameList.length){
+                        this.userinfo.respondent = '';
+                        Toast('请输入并选择受访人姓名')
+                    }
                 }
             },
-            getPersonInfo(){
 
-            },
             deletePerson(item,index){
                 this.userinfo.entourageList.splice(index,1);
             },
@@ -556,6 +563,7 @@
                     photoData: this.userinfo.photoData,//待确认
                     entourageList: this.userinfo.entourageList
                 }
+                localStorage.setItem('userinfo',JSON.stringify(this.userinfo));
             },
             getNameList(){
                 axios.post(this.ajaxUrl + "getAcceptNameList", {
@@ -581,6 +589,7 @@
                     .then(response => {
                         if(response.data.rescode == 200){
                             this.companyList = response.data.companyList;
+                            console.log(this.companyList)
                         }else{
                             Toast(response.data.resdes)
                         }

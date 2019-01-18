@@ -25,14 +25,14 @@
 </style>
 <template>
     <div class="homepage">
-          <!--<router-link  v-for="(item,index) in listdata" :key='index' class="homeList flexBetween"  :to="{path:item.router,query: {name: new Date().getTime()}}">-->
-            <!--<span>{{item.name}}</span>-->
-            <!--<img :src="item.icon">-->
-          <!--</router-link>-->
-        <div  v-for="(item,index) in listdata" :key='index' class="homeList flexBetween"  @click="goRouter(item.router)">
+          <router-link  v-for="(item,index) in listdata" :key='index' class="homeList flexBetween"  :to="{path:item.router,query: {name: new Date().getTime()}}">
             <span>{{item.name}}</span>
             <img :src="item.icon">
-        </div>
+          </router-link>
+        <!--<div  v-for="(item,index) in listdata" :key='index' class="homeList flexBetween"  @click="goRouter(item.router)">-->
+            <!--<span>{{item.name}}</span>-->
+            <!--<img :src="item.icon">-->
+        <!--</div>-->
     </div>
 </template>
 
