@@ -2,7 +2,8 @@
     $baseFontSize: 75;
     .homepage{
         width:100%;
-        height: 100vh;
+       height: 100vh;
+      overflow: hidden;
         .homeList{
             background: #fff;
             margin-bottom: 20px;

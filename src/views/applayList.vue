@@ -81,9 +81,8 @@
 <template>
     <div style="background: #f4f4f4;min-height:100vh;">
         <div class="scroll" v-if="noData">
-            <mt-loadmore :bottom-method="loadBottom" bottomPullText="上拉加载更多" :auto-fill="false" ref="loadmore"
-                         :bottom-all-loaded="allLoaded">
-                <div class="listBox" v-for="(item, index) in list" :key="index" @click='goDetail'>
+            <!--<mt-loadmore :bottom-method="loadBottom" bottomPullText="上拉加载更多" :auto-fill="false" ref="loadmore" :bottom-all-loaded="allLoaded">-->
+                <div class="listBox" v-for="(item,index) in list" :key="index" @click='goDetail(item.applyNum)'>
                     <div class="flexBetween listTop">
                         <span> {{item.applyTime}}</span>
                         <span v-if="item.auditStatus == '1'" class="applyStatus origin">待审核</span>
@@ -91,7 +90,7 @@
                         <span v-if="item.auditStatus == '3'" class="already">审核通过</span>
                     </div>
                     <div class="listMiddle flexBetween"
-                         @click='goDetail(item.applyNo,item.type,item.status)'>
+                         @click='goDetail(item.applyNum)'>
                         <div class="flexLeft">
                             <!--<img class='applayIcon godetail' src="../assets/images/geren.png">-->
                             <div class='info'>
@@ -109,7 +108,7 @@
                         </div>
                     </div>
                 </div>
-            </mt-loadmore>
+            <!--</mt-loadmore>-->
         </div>
         <div v-else style="margin: 0 auto;padding-top: 100px;text-align: center;color: #f00;font-weight: 600;font-size: 18px;">
             您还没有申请记录
@@ -127,74 +126,51 @@
         data() {
             return {
                 allLoaded: false,
-                list: [{'auditStatus':'1','name':'哈哈哈',sex:'nan','code':'444444444','applyNo':'eeeeeee','companyName':'北京中车科技有限责任公司','applyTime':'2018-12-24'}],
+                list: [],
                 pageSize: 10,
                 pageNum: 1,
                 userId: '',
                 loadMore: true,
-                noData: true
+                noData: true,
+                phone: '17666143833'
             }
         },
         created() {
-
+          if(localStorage.getItem('phone')){
+            this.phone = localStorage.getItem('phone');
+          }
         },
         mounted() {
-            this.userId = localStorage.getItem('userId');
-            // this.userId = '8C4C15479B0343ECBBA90540E059156D'
             this.getDataList()
         },
         methods: {
-            goSubcode(appointmentTime, applyNo) {
-                localStorage.setItem('appointmentTime', appointmentTime);
-                this.$router.push({path: '/subscribecode', query: {apply_no: applyNo, code: 0}})
-            },
-            goApply(applyNo, applyType) {
-                if (applyType == 1) {
-                    this.$router.push({path: '/personalDeclaration'})
-                } else if (applyType == 2) {
-                    this.$router.push({path: '/companyDeclar'})
-                }
-            },
-            goSubscible(applyNo) {
-                this.$router.push({path: '/subscribe', query: {applyNo: applyNo}})
-            },
-            goDetail(applyNo, applyType, applyStatus) {
-                window.location.href = this.ceshiUrl+'/applyDetail';
-                // this.$router.push({
-                //     path: '/applyDetail',
-                //     // query: {applyNo: applyNo, applyType: applyType, applyStatus: applyStatus}
-                // })
+            goDetail(applyNum) {
+                 this.$router.push({
+                     path: '/applyDetail',
+                      query: {applyNum: applyNum}
+                 })
             },
             getDataList() {
-                return;
                 var data = {
-                    pageSize: this.pageSize,
-                    pageNum: this.pageNum,
-                    userId: this.userId,
-                    type: 1
+                   phoneNum: this.phone
                 }
-                axios.post(this.ajaxUrl + "/accessforh5/getApplyList", data)
+                axios.post(this.ajaxUrl + "getApplyList", data)
                     .then(response => {
-                        console.log(response);
-                        var listdata = response.data.applyList;
-                        if (response.data.result.rescode == 200) {
-                            if (response.data.list.length != 0) {
+                        if (response.data.rescode == 200) {
+                          console.log(response)
+                          var listdata = response.data.applyList;
+                            if (response.data.applyList.length != 0) {
                                 this.noData = true;
-                                for (var i = 0; i < listdata.length; i++) {
-                                    listdata[i].applyTime = moment(listdata[i].applyTime).format('YYYY年MM月DD日');
-                                    this.list.push(listdata[i])
-                                }
+                              this.list = listdata;
                             }
-                            if (listdata.length == 0 || listdata.length < this.pageSize) {
+                            if (listdata.length == 0 ) {
                                 this.loadMore = false;
-                                this.noData = true;
-                                if(listdata.length == 0 && this.pageNum == 1){
-                                    console.log(this.pageNum)
-                                    this.noData = false;
-                                }
+                                this.noData = false;
                             }
+                        }else{
+                          this.noData = false;
+                          Toast(response.data.resdes)
                         }
-
                     }, err => {
                         console.log(err);
                     })

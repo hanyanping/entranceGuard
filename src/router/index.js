@@ -6,6 +6,7 @@ import applayList from '@/views/applayList'
 import applyDetail from '@/views/applyDetail'
 import auditInformation from '@/views/auditInformation'
 import applaypoliceList from '@/views/applaypoliceList'
+import sucess from '@/views/sucess'
 Vue.use(Router)
 
 export default new Router({
@@ -59,7 +60,15 @@ export default new Router({
             meta: {
                 title: '历史审核记录'
             }
+        },
+      {
+        path: '/sucess',
+        name: 'sucess',
+        component: sucess,
+        meta: {
+          title: '历史审核记录'
         }
+      }
 
 
     ]
