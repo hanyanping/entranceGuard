@@ -351,10 +351,11 @@
 
             var that = this;
             document.addEventListener('message', function(msg) {//获取客户端人脸识别数据
-                var data = JSON.parse(msg.data)
+                var data = JSON.parse(msg.data);
                 if(data){
                     if(data.hasOwnProperty('imageData')){
                         that.userinfo.chapterUrl = msg.data.imageData;
+
                         localStorage.setItem("url",that.userinfo.chapterUrl)
                     }
                 }else{
